@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.db
+carte.html
+*.txt
+.replit
+replit.nix
