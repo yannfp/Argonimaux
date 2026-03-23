@@ -5,3 +5,4 @@ carte.html
 *.txt
 .replit
 replit.nix
+venv/
