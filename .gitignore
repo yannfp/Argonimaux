@@ -2,8 +2,11 @@ __pycache__/
 *.pyc
 *.db
 carte.html
+a.out
+.breakpoints
 *.txt
 .replit
 replit.nix
-venv/
+poetry.lock
+pyproject.toml
 venv/
