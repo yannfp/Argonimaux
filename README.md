@@ -8,7 +8,7 @@ A desktop application to visualize the movements of marine animals and buoys aro
 
 ## Origin
 
-The idea came from a class of 6th graders at our school. They were studying marine biodiversity and wanted a way to track specific turtles, sharks, and buoys near France — the existing CNES tool covered the whole world and was hard to navigate for their use case. Their teacher reached out to our Terminale NSI class, and three of us took it on.
+The idea came from a class of 6th graders at our school. They were studying marine biodiversity and wanted a way to track specific turtles, sharks, and buoys near France — the existing CNES tool covered the whole world and was too broad for their use case. Their teacher reached out to our Terminale NSI class, and three of us took it on.
 
 ---
 
@@ -17,39 +17,57 @@ The idea came from a class of 6th graders at our school. They were studying mari
 - Displays a map of Europe divided into a coordinate grid
 - Colour-codes each zone based on how many tracked animals have passed through it (green → orange → red → dark red)
 - Lets the user click a zone to see which animals have been recorded there
-- Renders the full trajectory of a selected animal using Folium (interactive HTML map)
-- Pulls all data from a local SQLite database populated from CNES `.txt` files
+- Renders the full trajectory of a selected animal in an interactive HTML map (Folium), with date markers placed every 75 data points
+- Links to the project's Instagram page and the original CNES data source
 
 ---
 
 ## Stack
 
 - **Python** — tkinter (UI), PIL (image handling), Folium (map rendering), SQLite3 (database)
-- **SQLite** — stores all animal coordinates extracted from CNES data files
-- **Folium** — generates interactive HTML maps with trajectory polylines
+- **SQLite** — stores all animal coordinates extracted from CNES `.txt` files
+- **Folium** — generates an interactive `carte.html` with trajectory polylines and date markers
 
 ---
 
 ## Architecture
 
 ```
-CNES .txt files
-    └── extractionCSV.py     — parses raw data into lists
-    └── gestionBD.py         — inserts records and manages the SQLite DB
+main.py                          — entry point
 
-Argonimaux.db (SQLite)
-    └── animaux table        — coordinates per timestamp
-    └── liens table          — maps animal name + type to its ID
+CNES .txt files (not included)
+    └── GestionDonnees/
+            extractionCSV.py     — parses raw .txt data into lists
+            gestionBD.py         — manages the SQLite DB (creation, inserts, queries)
 
-tkinter.py                   — main window, grid, click detection, combobox
-folium.py                    — renders selected animal trajectory to carte.html
+Argonimaux.db (generated on first run)
+    └── animaux table            — one row per GPS fix (id, num, class, date, time, lat, lon)
+    └── liens table              — maps animal name + type to its tracking number
+
+Affichage/
+    tkinter.py                   — main window, grid rendering, click detection, combobox, buttons
+    openstreetmap.png            — base map image
+    logoPage.png                 — app logo
+    logo_instagram.jpg           — Instagram button icon
+    Onest-Regular.ttf            — custom font
+    icon.ico                     — window icon
 ```
+
+---
+
+## Tracked animals
+
+| Type | Animals |
+|------|---------|
+| Turtles | Anna Antimo, Antioche, Ashoka, Bambi, Bouton d'or, Chacahe, Danae, Delta, Domino, Laura, Moana, Muse, Neus, Ninja-Balaeres, Rosa, Tikaf, Tom, Vita, Zamzam |
+| Sharks | Anna Pelerine, Gary, Marie B |
+| Buoys | ChildOceans, Coris, Coris 2, Zelisca, Pegase 2019, Phebus, VenusExpe, Meduse |
 
 ---
 
 ## Team
 
-Built in three weeks by a team of three students from Lycée Le Ferradou (Toulouse) for the NSI Trophy 2023:
+Built by a team of three students from Lycée Le Ferradou (Toulouse) for the NSI Trophy 2023:
 
 | Name | Role |
 |------|------|
@@ -63,38 +81,26 @@ Supervised by Jérôme Bussy and Francis Ceuille (NSI teachers).
 
 ## Setup
 
-**Requirements:**
+**Install dependencies:**
 
 ```bash
-pip install tk folium Pillow
+pip install folium Pillow
 ```
 
-**First run only** — uncomment line 52 in `tkinter.py` to initialise the database tables:
+**Download the CNES data files** from the [Argonautica programme](https://enseignantsmediateurs.cnes.fr/fr/projets/argonautica/argonimaux) and place the `.txt` files in the root of the project (one file per animal, named exactly as listed in the tracked animals table above).
 
-```python
-gestion.creation(connection)
-```
-
-Then run:
+**Run:**
 
 ```bash
-python tkinter.py
+python main.py
 ```
 
-> Re-comment the `creation()` call before running again — it only needs to run once.
-
----
-
-## Data
-
-Animal tracking data comes from the [CNES Argonautica programme](https://enseignantsmediateurs.cnes.fr/fr/projets/argonautica/argonimaux). The `.txt` files need to be downloaded manually and placed in the project directory.
-
-Tracked animals include turtles (Anna Antimo, Ashoka, Bambi, Rosa, Vita…), buoys (ChildOceans, Coris, Méduse…), and sharks (Anna Pèlerine).
+The database is created automatically on first run.
 
 ---
 
 ## Known limitations
 
 - Map dimensions are hardcoded — the pixel-to-degree conversion only works with the included `openstreetmap.png` at its exact dimensions
-- Data files must be downloaded and placed manually (no API integration yet)
-- The interface is functional but minimal
+- Data files must be downloaded manually from CNES (no API integration)
+- Windows only (`fenetre.state("zoomed")` and `.iconbitmap()` are Windows-specific)
